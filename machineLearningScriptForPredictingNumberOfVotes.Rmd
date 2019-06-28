@@ -1,5 +1,5 @@
 ---
-title: "Machine Learning Script for the Predition of the Vote Number"
+title: "Machine Learning Script for the Predition of the Win or Loss of the Candidates During the First Round"
 author: "Adrien Ratsimbaharison"
 date: "June 27, 2019"
 output:
@@ -69,10 +69,10 @@ voteNumberData$educationLevel <- as.numeric(voteNumberData$educationLevel)
 
 Defining the problem:
 
-The problem in this machine learning is to predict the result of the first round election for each candidates during the 2018 presidential elections. In other words, we are dealing here with a machine learning classification into class:
+The problem in this machine learning is to predict the result of the first round election for each candidates during the 2018 presidential elections. In other words, we are dealing here with a machine learning classification into two classes:
 
 - win, or
-- lose.
+- loss.
 
 
 

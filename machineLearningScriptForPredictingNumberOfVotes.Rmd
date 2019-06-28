@@ -1,0 +1,228 @@
+---
+title: "Machine Learning Script for the Predition of the Vote Number"
+author: "Adrien Ratsimbaharison"
+date: "June 27, 2019"
+output:
+  html_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+In this machine learning implementation, we follow the guidelines suggested by different data scientists who specialize in the use r statistical and programming language and particularly the Caret package, created and maintained by Max Kuhn. Among these guidelines, we found particularly useful Saurav Kaushik's "Practical guide to implement machine learning with CARET in R" and Brett Lanz's "Machine Learning with R." After the initial step of installing the Caret package and loading the dataset into r, this machine learning implementation includes the following:
+
+- defining the problem,
+- preprocessing the data if necessary,
+- spliting the data into train and test sets,
+- feature selection using the "recursive feature elimination"" or "rfe"" function,
+- traning the models on the train set,
+- generating variable importance,
+- making predictions on the test set and assessing the accuracy of the predictions.
+
+
+## 1. Getting started with loading the package, looking at the data, and defining the problem
+
+Installing and loading the Caret package and its dependencies:
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+# Intalling the caret package if it is not already installed
+
+# install.packages("caret", dependencies = c("Depends", "Suggests"))
+
+# loading the caret package and other required packages:
+library(caret)
+library(dplyr)
+library(magrittr)
+library(gbm)
+library(readxl)
+library(knitr)
+library(caret)
+
+```
+
+Reading the data in R and looking at its structure:
+
+```{r Loading the data, message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+# Reading the data
+voteNumberData <- read_excel("presidentialCandidates.xlsx")
+voteNumberData <- as.data.frame(voteNumberData)
+voteNumberData <- as_tibble(voteNumberData)
+
+# Looking at its structure
+# str(voteNumberData)
+
+# Selecting the variables of interest
+
+voteNumberData <- select(voteNumberData, age, gender, regionOfOrigin, educationLevel, academicField, professionalOccupation, governmentExperience, campaignIssue1, memberOfTheCollectif, meansOfTransportation, coveredRegion, rallyWithSupertars, tvRadioAdvertising, giftsToVoters, firstRoundResult)
+
+# Changing the types of all variables to factor, except the variable "educationLevel" which should be kept numeric
+voteNumberData <- mutate_if(voteNumberData, is.character, as.factor)
+
+voteNumberData$educationLevel <- as.numeric(voteNumberData$educationLevel)
+
+```
+
+
+Defining the problem:
+
+The problem in this machine learning is to predict the result of the first round election for each candidates during the 2018 presidential elections. In other words, we are dealing here with a machine learning classification into class:
+
+- win, or
+- lose.
+
+
+
+## 2. Pre-processing the data using Caret
+
+In this pre-processing step, we first check for the missing values and remove them. 
+
+```{r cheking NA, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+# checking for missing values
+sum(is.na(voteNumberData))
+
+# removing NAs
+voteNumberData <- na.omit(voteNumberData)
+sum(is.na(voteNumberData))
+```
+
+Next, we are centering and scaling the numerical values:
+
+```{r centering and scaling numerical variables, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+# centering and scaling the numerical variable educationLevel
+preProcValues <- preProcess(voteNumberData, method = c("center","scale"))
+
+library('RANN')
+voteNumberData_processed <- predict(preProcValues, voteNumberData)
+sum(is.na(voteNumberData_processed))
+
+```
+
+
+Then, we create "one hot encoding" for the factor variables:
+
+```{r creating one hot encoding, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+# before creating the one hot encoding, we need to transform the outcome variable to numeric
+#Converting outcome variable to numeric
+voteNumberData_processed$firstRoundResult <-ifelse(voteNumberData_processed$firstRoundResult=='loss',0,1)
+
+#Converting every categorical variable to numerical using dummy variables
+dmy <- dummyVars(" ~ .", data = voteNumberData_processed,fullRank = T)
+voteNumberData_processed <- data.frame(predict(dmy, newdata = voteNumberData_processed))
+
+#Checking the structure of transformed train file
+str(voteNumberData_processed)
+```
+Finally, before splitting the data, we need to convert the outcome variable back to factor:
+
+```{r converting the outcome variable back to factor, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+# converting firstRoundResult back to factor
+voteNumberData_processed$firstRoundResult <- as.factor(voteNumberData_processed$firstRoundResult)
+
+```
+
+
+## 3. Splitting the data using Caret
+
+
+In this step, we splitt the dataset into trainSet and testSet based on outcome with a ratio of 65% and 35%, using createDataPartition in Caret.
+
+```{r splitting of the data, message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+
+#Spliting dataset into trainSet and testSet
+set.seed(234)
+index <- createDataPartition(voteNumberData_processed$firstRoundResult, p=0.65, list=FALSE)
+firstRoundResultTrainSet <- voteNumberData_processed[index,]
+firstRoundResultTestSet <- voteNumberData_processed[-index,]
+
+#Checking the structure of approvalTrainSet
+str(firstRoundResultTrainSet)
+
+```
+
+
+
+## 4. Feature selection using Caret
+
+In this step, we use the "recursive feature elimination" or "rfe" function in Caret to identify the best subset of features to be included in the models.
+
+```{r Feature selection using rfe, echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+# Feature selection using rfe in caret
+ctrl <- rfeControl(functions = rfFuncs,
+                   method = "repeatedcv",
+                   repeats = 3,
+                   verbose = FALSE)
+
+y <- firstRoundResultTrainSet$firstRoundResult
+x <- select(firstRoundResultTrainSet, - firstRoundResult)
+
+firstRoundResultProfile <- rfe(x, y,
+                rfeControl = ctrl)
+
+firstRoundResultProfile
+
+```
+
+
+## 5. Training models using Caret
+
+In this step, we train the generalized linear model (glm) on the train set:
+
+```{r Training the models, echo=TRUE, paged.print=FALSE}
+
+
+firstRoundResultModel_glm <- train(firstRoundResult ~ ., data = firstRoundResultTrainSet, 
+                 method = "glm")
+
+
+```
+
+
+## 6. Variable importance estimation using Caret
+
+In this step, we check the variable importance estimates in Caret by using the "varImp" function" for the glm model.
+
+
+```{r Variable importance with GBM, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+# Checking variable importance with glm
+# Variable Importance
+varImp(object=firstRoundResultModel_glm)
+
+
+#Plotting Variable importance for GBM model
+plot(varImp(object=firstRoundResultModel_glm),main="Variable Importance Using GBM", top = 10)
+
+```
+
+
+
+## 7. Making predictions using Caret
+
+```{r}
+#Predictions with glm
+firstRoundPrediction_glm <-predict.train(object=firstRoundResultModel_glm,firstRoundResultTestSet,type="raw")
+table(firstRoundPrediction_glm)
+
+confusionMatrix(firstRoundPrediction_glm,firstRoundResultTestSet$firstRoundResult)
+
+
+```
+
+
+
+## Conclusion
+
+The top 5 predictors (out of 54) identified in this machine learning are the following variables:   
+
+- academicField.no.college.education, 
+- educationLevel, 
+- meansOfTransportation.helicopter, 
+- governmentExperience.former.president, 
+- coveredRegion.all.22.regions.
+
+
+   
+

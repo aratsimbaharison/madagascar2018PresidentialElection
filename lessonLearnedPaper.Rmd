@@ -1,0 +1,289 @@
+---
+title: "Lessons Learned from the 2018 Presidential Election in Madagascar:
+Breaking the Cycle of  Political Morass"
+author: "Richard Marcus and Adrien Ratsimbaharison"
+date: "June 27, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Abstract  
+
+
+Madagascar has a history of cyclical social movements driving political change.  This can largely be attributed to a narrow political space replete with predatory actors married to private sector interests and civil society leaders who are captured by rents. Entering into the November 2018 elections the electorate was at an impasse.  The only three viable presidential candidates were discredited giving rise to popular perceptions of disenfranchisement and a divided international community.  Unpacking the complex social features that continuously undergird cyclical instability is necessarily an interdisciplinary pursuit, blending anthropology, sociology, and economic theoretical foundations to lay bare an analytical task political science itself has been unable to accomplish.  Consistent with the methodological hybridity and interdisciplinarity in the conference call, this study uses qualitative interviews and participant observation, elite interviews, and survey data collected by the author in the capital in July 2018 and May 2019 to analyze drivers of political malcontent.  In so doing it helps us understand the presidential victory of onetime illegitimate leader Andry Rajoelina, becomes predictive of electoral outcomes, helps us to understand Madagascar’s political morass, and unpacks some of the possible tools that could be employed to break what has become an ever more precarious and rapid cycle of violence, mismanagement, and disarray.   
+
+
+
+**Keywords:** Sub-Saharan Africa, Madagascar, presidential election, candidates
+
+
+## Introduction   
+
+
+
+
+
+
+
+### Purpose and research questions   
+
+
+
+
+
+
+## Literature review   
+
+
+
+
+
+## Methodology   
+
+
+
+
+## Findings    
+
+
+
+
+### Quantitative analysis
+
+
+
+### Qualitative analysis
+
+
+## Discussion
+
+
+## Conclusion
+
+
+## Tables and Figures    
+
+
+
+
+```{r Loading the packages and the data, message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+# Loading the packages
+library(readxl)
+library(dplyr)
+library(ggplot2)
+library(knitr)
+
+# Loading the data
+presidentialCandidates <- read_excel("presidentialCandidates.xlsx")
+presidentialCandidates <- as_tibble(presidentialCandidates)
+# converting character variables to factors
+presidentialCandidates <- mutate_if(presidentialCandidates, is.character, as.factor)
+# keeping levelOfEducation, campaignSpendingUSD, firstRoundVotes, and	firstRoundPercentage as numeric
+presidentialCandidates$educationLevel <- as.numeric(presidentialCandidates$educationLevel)
+presidentialCandidates$campaignSpendingUSD <- as.numeric(presidentialCandidates$campaignSpendingUSD)
+presidentialCandidates$firstRoundVotes <- as.numeric(presidentialCandidates$firstRoundVotes)
+presidentialCandidates$firstRoundPercentage <- as.numeric(presidentialCandidates$firstRoundPercentage)
+head(presidentialCandidates)
+str(presidentialCandidates)
+```
+
+
+
+```{r age calculation, message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+# age of the candidates
+ageGroup <- table(presidentialCandidates$age)
+ageGroupProp <- prop.table(ageGroup)
+ageGroup <- as.data.frame(ageGroup)
+names(ageGroup) <- c("Age", "Frequency")
+```
+
+
+```{r age frequency table, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+kable(ageGroup, caption = "Table 1 - The Candidates by Age Groups")
+```
+
+
+```{r age bar plot, echo=FALSE, fig.height=3.5, fig.width=3.5, message=FALSE, warning=FALSE, fig.cap="Fig. 1 - The Candidates by Age Groups", paged.print=FALSE}
+ggplot(presidentialCandidates, aes(age)) +
+  geom_bar(aes(y = (..count..)/sum(..count..)*100)) +
+  ylab("Percentage")
+
+```
+
+
+
+```{r calculation of gender, message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+# Gender of the candidates
+groupByGender <- table(presidentialCandidates$gender)
+genderProp <- prop.table(groupByGender)
+groupByGender <- as.data.frame(groupByGender)
+names(groupByGender) <- c("Gender", "Frequency")
+```
+
+
+```{r gender frequency table, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+kable(groupByGender, caption = "Table 2 - The Candidates by Gender")
+
+```
+
+
+```{r gender bar plot, echo=FALSE, message=FALSE, fig.height=3.5, fig.width=3.5, message=FALSE, warning=FALSE, fig.cap = "Fig. 2 - The Candidates by Gender", paged.print=FALSE}
+ggplot(presidentialCandidates, aes(gender)) +
+  geom_bar(aes(y = (..count..)/sum(..count..)*100)) +
+  ylab("Percentage")
+
+```
+
+
+
+
+```{r calculation of origin, message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+# The candidates by origin
+groupByOrigin <- table(presidentialCandidates$regionOfOrigin)
+originProp <- prop.table(groupByOrigin)
+groupByOrigin <- as.data.frame(groupByOrigin)
+names(groupByOrigin) <- c("Region", "Frequency")
+```
+
+
+```{r origins frequency table, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+kable(groupByOrigin, caption = "Table 3 - The Candidates by Region of Origin")
+
+```
+
+
+```{r origin bar plot, echo=FALSE, fig.cap="Fig. 3 - The Candidates by Region of Origin", fig.height=5, fig.width=7, message=FALSE, warning=FALSE, paged.print=FALSE}
+ggplot(presidentialCandidates, aes(regionOfOrigin)) +
+  geom_bar(aes(y = (..count..)/sum(..count..)*100)) +
+  ylab("Percentage")
+
+```
+
+
+
+```{r calculation of level of education, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+# Level of education count and proportion
+educationLevelCount <- table(presidentialCandidates$educationLevel)
+educationLevelCountProp <- prop.table(educationLevelCount)
+educationLevelCount <- as.data.frame(educationLevelCount)
+names(educationLevelCount) <- c("Level", "Frequency")
+
+```
+
+
+```{r level of education table, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+
+kable(educationLevelCount, caption = "Table 4 - The Candidates by Level of Education")
+
+```
+
+
+```{r level of education summary, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+# summary statistics on the level of education
+presidentialCandidates$educationLevel <- as.numeric(presidentialCandidates$educationLevel)
+educationSummary <- summary(presidentialCandidates$educationLevel, na.rm = TRUE)
+educationSummary
+
+```
+
+
+```{r fig level of education bar plot, echo=FALSE, fig.cap="Fig. 4 - The Candidates by Level of Education", fig.height=5, fig.width=5, message=FALSE, warning=FALSE, paged.print=FALSE}
+presidentialCandidates$educationLevel <- as.factor(presidentialCandidates$educationLevel)
+ggplot(presidentialCandidates, aes(educationLevel)) +
+  geom_bar(aes(y = (..count..)/sum(..count..)*100)) +
+  ylab("Percentage")
+
+```
+
+
+```{r calculation of academic field, message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+# The candidates by academic fields
+academicFieldsCount <- table(presidentialCandidates$academicField)
+academicFieldsProp <- prop.table(academicFieldsCount)
+academicFieldsCount <- as.data.frame(academicFieldsCount)
+names(academicFieldsCount) <- c("Academic Field", "Frequency")
+```
+
+
+```{r academic field frequency table, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+kable(academicFieldsCount, caption = "Table 5 - The Candidates by Academic Fields")
+
+```
+
+
+```{r calculation of campaing issue, message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+# The number 1 campaign issue of the candidates
+campaignIssue1Count <- table(presidentialCandidates$campaignIssue1)
+campaignIssue1Prop <- prop.table(campaignIssue1Count)
+campaignIssue1Count <- as.data.frame(campaignIssue1Count)
+names(campaignIssue1Count) <- c("Major Campaign Issue", "Frequency")
+```
+
+
+```{r campaign issue 1 frequency table, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+kable(campaignIssue1Count, caption = "Table 7 - The Candidates by Major Campaign Issues")
+
+```
+
+
+```{r calculation of government experience, message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+# The candidates by government experience
+governmentExperidenceCount <- table(presidentialCandidates$governmentExperience)
+governmentExperidenceProp <- prop.table(governmentExperidenceCount)
+governmentExperidenceCount <- as.data.frame(governmentExperidenceCount)
+names(governmentExperidenceCount) <- c("Previous Government Position", "Frequency")
+```
+
+
+```{r government exp frequency table, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+kable(governmentExperidenceCount, caption = "Table 6 - The Candidates by Government Experience")
+
+```
+
+
+```{r calculation on means of transportation, message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+# The candidates by major means of transportation
+meansOfTransportationCount <- table(presidentialCandidates$meansOfTransportation)
+meansOfTransportationProp <- prop.table(meansOfTransportationCount)
+meansOfTransportationCount <- as.data.frame(meansOfTransportationCount)
+names(meansOfTransportationCount) <- c("Major Means of Transportation", "Frequency")
+```
+
+
+```{r means of transportation frequency table, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+kable(meansOfTransportationCount, caption = "Table 8 - The Candidates by Major Means of Transportation")
+
+```
+
+
+```{r calculation on region covered, message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+# The candidates by major means of transportation
+regionCoveredCount <- table(presidentialCandidates$coveredRegion)
+regionCoveredProp <- prop.table(regionCoveredCount)
+regionCoveredCount <- as.data.frame(regionCoveredCount)
+names(regionCoveredCount) <- c("Regions Covered by the Candidate", "Frequency")
+```
+
+
+```{r region covered frequency table, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+kable(regionCoveredCount, caption = "Table 9 - The Candidates by Number of Regions Covered")
+
+```
+
+```{r crosstabulating the means of transportation and regions covered, message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+transportationAndCoverage <- table(presidentialCandidates$meansOfTransportation, presidentialCandidates$coveredRegion)
+
+```
+
+```{r Table transportation Vs. Region covered, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+
+kable(transportationAndCoverage, caption = "Table 10 - Regions Covered by Means of Transportation")
+
+```
+
+
+## References
+
